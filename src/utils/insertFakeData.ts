@@ -80,8 +80,7 @@ export const insertFakeData = async () => {
       {
         name: "Airbnb",
         category: categories[3]._id,
-        image:
-          "https://images.seeklogo.com/logo-png/28/2/airbnb-logo-png_seeklogo-284907.png",
+        image:'https://logos-world.net/wp-content/uploads/2020/07/Airbnb-Emblem.png',
         website: "https://www.airbnb.com",
         description:
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
@@ -160,7 +159,7 @@ export const insertFakeData = async () => {
         type: types[Math.floor(Math.random() * types.length)],
         title: c,
         verified: Math.random() < 0.75,
-        price: Math.random() * 100 + 1,
+        price: Math.round(Math.random() * 100 + 1),
         terms_and_conditions: "Valid on select products. Limited time only.",
         code: genRandomCode(),
       };

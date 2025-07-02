@@ -7,6 +7,7 @@ const couponSchema = new Schema({
   type: { type: String, enum: ["deal", "code"], required: true },
   title: { type: String, required: true },
   code: { type: String, default: "" },
+  verified: { type: Boolean, default: false },
 });
 
 const Coupon = model("Coupon", couponSchema);

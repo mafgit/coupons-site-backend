@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Coupon from "../models/Coupon";
 
-const getCouponsForBrand = (req: Request, res: Response) => {
+export const getCouponsForBrand = (req: Request, res: Response) => {
   Coupon.find({ brand: req.params.id })
     .populate("brand")
     .then((coupons) => {
@@ -12,7 +12,7 @@ const getCouponsForBrand = (req: Request, res: Response) => {
     });
 };
 
-const getCoupon = (req: Request, res: Response) => {
+export const getCoupon = (req: Request, res: Response) => {
   const { id } = req.params;
 
   Coupon.findById(id)
@@ -25,4 +25,13 @@ const getCoupon = (req: Request, res: Response) => {
     });
 };
 
-export { getCoupon, getCouponsForBrand };
+export const getAllCoupons = (req: Request, res: Response) => {
+  Coupon.find()
+    // .populate("brand")
+    .then((coupons) => {
+      return res.json({ coupons });
+    })
+    .catch((err) => {
+      return res.json({ err });
+    });
+};

@@ -24,7 +24,7 @@ export const getBrandsForCategory = (req: Request, res: Response) => {
     });
 };
 
-export const getBrandBySlug = async (req: Request, res: Response) => {
+export const getBrandBySlug = async (req: any, res: any) => {
   try {
     const { slug } = req.params;
     const brand = await Brand.findOne({ slug }).populate("category");
