@@ -90,3 +90,36 @@ export const addBrand = async (req: Request, res: Response): Promise<void> => {
     res.json({ success: false, error });
   }
 };
+
+export const editBrand = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) throw new Error("Invalid Id");
+    const { valid, error } = validateBrand(req.body);
+    if (valid) {
+      const brand = await Brand.updateOne(
+        { _id: new mongoose.Types.ObjectId(id) },
+        req.body
+      );
+      res.json({ brand, success: true });
+    } else {
+      res.json({ success: false, error });
+    }
+  } catch (error) {
+    res.json({ success: false, error });
+  }
+};
+
+export const deleteBrand = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) throw new Error("Invalid Id");
+    await Brand.deleteOne({ _id: new mongoose.Types.ObjectId(id) });
+    res.json({ success: true });
+  } catch (error) {
+    res.json({ success: false, error });
+  }
+};

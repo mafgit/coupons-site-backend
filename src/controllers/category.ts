@@ -49,3 +49,40 @@ export const addCategory = async (req: Request, res: Response) => {
     res.json({ success: false, error });
   }
 };
+
+export const editCategory = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) throw new Error("Invalid Id");
+
+    const { valid, error } = validateCategory(req.body);
+    if (valid) {
+      const category = await Category.updateOne(
+        { _id: new mongoose.Types.ObjectId(id) },
+        req.body
+      );
+      res.json({ category, success: true });
+    } else {
+      res.json({ success: false, error });
+    }
+  } catch (error) {
+    res.json({ success: false, error });
+  }
+};
+
+export const deleteCategory = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) throw new Error("Invalid Id");
+    await Category.deleteOne({ _id: new mongoose.Types.ObjectId(id) });
+    res.json({ success: true });
+  } catch (error) {
+    res.json({ success: false, error });
+  }
+};
