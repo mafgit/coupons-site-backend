@@ -1,14 +1,51 @@
 import { Request, Response } from "express";
 import Category from "../models/Category";
+import { ICategory } from "../types/ICategory";
+import { validateCategory } from "../utils/validateEntity";
+import mongoose from "mongoose";
 
-const getAllCategories = (req: Request, res: Response) => {
-  Category.find()
-    .then((categories) => {
-      return res.json({ categories });
+export const getAllCategories = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const query: { [key: string]: any } = {};
+    if (
+      req.query._id &&
+      mongoose.Types.ObjectId.isValid(req.query._id as string)
+    )
+      query["_id"] = new mongoose.Types.ObjectId(req.query._id as string);
+    if (req.query.name)
+      query["name"] = { $regex: req.query.name, $options: "i" };
+
+    const categories = await Category.find(query);
+    res.json({ categories });
+  } catch (err) {
+    res.json({ err });
+  }
+};
+
+export const getCategoryById = (req: Request, res: Response): void => {
+  Category.findById(req.body.id)
+    .then((category) => {
+      res.json({ category });
     })
     .catch((err) => {
-      return res.json({ err });
+      res.json({ err });
     });
 };
 
-export { getAllCategories };
+export const addCategory = async (req: Request, res: Response) => {
+  try {
+    const data: ICategory = req.body;
+    const { valid, error } = validateCategory(data);
+    if (!valid) {
+      res.json({ success: false, error });
+      return;
+    }
+    await Category.create(data);
+    res.json({ success: true });
+  } catch (error) {
+    res.json({ success: false, error });
+  }
+};

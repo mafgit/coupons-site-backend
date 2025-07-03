@@ -3,12 +3,16 @@ import {
   getAllBrands,
   getBrandBySlug,
   getBrandsForCategory,
+  addBrand,
+  getBrandById,
 } from "../controllers/brand";
 
 const router = Router();
 
-router.get("/by-slug/:slug", getBrandBySlug);
+router.post("/add", addBrand);
 router.get("/all", getAllBrands);
+router.get("/by-slug/:slug", getBrandBySlug);
+router.get("/by-id/:id", getBrandById);
 router.get("/for-category/:id", getBrandsForCategory);
 
 export default router;
