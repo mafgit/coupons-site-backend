@@ -8,12 +8,14 @@ import {
   deleteBrand,
   getBrandById,
 } from "../controllers/brand";
+import { verifyLoggedIn } from "../middlewares/verifyLoggedIn";
+import { verifyAdmin } from "../middlewares/verifyAdmin";
 
 const router = Router();
 
-router.post("/add", addBrand);
-router.put("/edit/:id", editBrand);
-router.delete("/delete/:id", deleteBrand);
+router.post("/add", verifyLoggedIn, verifyAdmin, addBrand);
+router.put("/edit/:id", verifyLoggedIn, verifyAdmin, editBrand);
+router.delete("/delete/:id", verifyLoggedIn, verifyAdmin, deleteBrand);
 router.get("/all", getAllBrands);
 router.get("/by-slug/:slug", getBrandBySlug);
 router.get("/by-id/:id", getBrandById);

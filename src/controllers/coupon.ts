@@ -11,7 +11,7 @@ export const getCouponsForBrand = (req: Request, res: Response) => {
       return res.json({ coupons });
     })
     .catch((err) => {
-      return res.json({ err });
+      return res.status(400).json({ err });
     });
 };
 
@@ -24,7 +24,7 @@ export const getCouponById = (req: Request, res: Response) => {
       return res.json({ coupon });
     })
     .catch((err) => {
-      return res.json({ err });
+      return res.status(400).json({ err });
     });
 };
 
@@ -63,7 +63,7 @@ export const getAllCoupons = async (
     }
     res.json({ coupons });
   } catch (err) {
-    res.json({ err, coupons: [] });
+    res.status(400).json({ err, coupons: [] });
   }
 };
 
@@ -80,7 +80,7 @@ export const addCoupon = async (req: Request, res: Response) => {
     await Coupon.create(data);
     res.json({ success: true });
   } catch (error) {
-    res.json({ success: false, error });
+    res.status(400).json({ success: false, error });
   }
 };
 
@@ -102,7 +102,7 @@ export const editCoupon = async (
       res.json({ success: false, error });
     }
   } catch (error) {
-    res.json({ success: false, error });
+    res.status(400).json({ success: false, error });
   }
 };
 
@@ -116,6 +116,6 @@ export const deleteCoupon = async (
     await Coupon.deleteOne({ _id: new mongoose.Types.ObjectId(id) });
     res.json({ success: true });
   } catch (error) {
-    res.json({ success: false, error });
+    res.status(400).json({ success: false, error });
   }
 };

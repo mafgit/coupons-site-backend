@@ -31,7 +31,7 @@ export const getAllBrands = async (
     }
     res.json({ brands });
   } catch (err) {
-    res.json({ err, brands: [] });
+    res.status(400).json({ err, brands: [] });
   }
 };
 
@@ -42,7 +42,7 @@ export const getBrandsForCategory = (req: Request, res: Response): void => {
       res.json({ brands });
     })
     .catch((err) => {
-      res.json({ err });
+      res.status(400).json({ err });
     });
 };
 
@@ -57,7 +57,7 @@ export const getBrandBySlug = async (
     if (brand) coupons = await Coupon.find({ brand: brand._id });
     res.json({ brand, coupons });
   } catch (err) {
-    res.json({ err });
+    res.status(400).json({ err });
   }
 };
 
@@ -70,7 +70,7 @@ export const getBrandById = async (
     const brand = await Brand.findById(id).populate("category");
     res.json({ brand });
   } catch (err) {
-    res.json({ err });
+    res.status(400).json({ err });
   }
 };
 
@@ -87,7 +87,7 @@ export const addBrand = async (req: Request, res: Response): Promise<void> => {
     await Brand.create(data);
     res.json({ success: true });
   } catch (error) {
-    res.json({ success: false, error });
+    res.status(400).json({ success: false, error });
   }
 };
 
@@ -106,7 +106,7 @@ export const editBrand = async (req: Request, res: Response): Promise<void> => {
       res.json({ success: false, error });
     }
   } catch (error) {
-    res.json({ success: false, error });
+    res.status(400).json({ success: false, error });
   }
 };
 
@@ -120,6 +120,6 @@ export const deleteBrand = async (
     await Brand.deleteOne({ _id: new mongoose.Types.ObjectId(id) });
     res.json({ success: true });
   } catch (error) {
-    res.json({ success: false, error });
+    res.status(400).json({ success: false, error });
   }
 };

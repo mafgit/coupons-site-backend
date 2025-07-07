@@ -21,18 +21,23 @@ export const getAllCategories = async (
     const categories = await Category.find(query);
     res.json({ categories });
   } catch (err) {
-    res.json({ err });
+    res.status(400).json({ err });
   }
 };
 
 export const getCategoryById = (req: Request, res: Response): void => {
-  Category.findById(req.body.id)
-    .then((category) => {
-      res.json({ category });
-    })
-    .catch((err) => {
-      res.json({ err });
-    });
+  if (
+    req.params.id &&
+    mongoose.Types.ObjectId.isValid(req.params.id as string)
+  ) {
+    Category.findById(new mongoose.Types.ObjectId(req.params.id as string))
+      .then((category) => {
+        res.json({ category });
+      })
+      .catch((err) => {
+        res.status(400).json({ err });
+      });
+  } else res.status(400).json({ err: "Invalid Id" });
 };
 
 export const addCategory = async (req: Request, res: Response) => {
@@ -46,7 +51,7 @@ export const addCategory = async (req: Request, res: Response) => {
     await Category.create(data);
     res.json({ success: true });
   } catch (error) {
-    res.json({ success: false, error });
+    res.status(400).json({ success: false, error });
   }
 };
 
@@ -69,7 +74,7 @@ export const editCategory = async (
       res.json({ success: false, error });
     }
   } catch (error) {
-    res.json({ success: false, error });
+    res.status(400).json({ success: false, error });
   }
 };
 
@@ -83,6 +88,6 @@ export const deleteCategory = async (
     await Category.deleteOne({ _id: new mongoose.Types.ObjectId(id) });
     res.json({ success: true });
   } catch (error) {
-    res.json({ success: false, error });
+    res.status(400).json({ success: false, error });
   }
 };

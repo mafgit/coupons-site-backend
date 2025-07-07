@@ -2,15 +2,26 @@ import express from "express";
 import mongoose from "mongoose";
 import brandRouter from "./routes/brand";
 import categoryRouter from "./routes/category";
+import authRouter from "./routes/auth";
 import couponRouter from "./routes/coupon";
+import userRouter from "./routes/user";
 import { insertFakeData } from "./utils/insertFakeData";
 import Coupon from "./models/Coupon";
-import cors from 'cors'
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
-app.use(cors())
+app.use(
+  cors({
+    credentials: true,
+    origin: "http://localhost:3000",
+  })
+);
+app.use(cookieParser());
 app.use(express.json());
+app.use("/api/auth", authRouter);
 app.use("/api/brand", brandRouter);
+app.use("/api/user", userRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/coupon", couponRouter);
 app.get("/api/home", async (req: any, res: any) => {
