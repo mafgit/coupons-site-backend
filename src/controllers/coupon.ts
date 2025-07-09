@@ -33,21 +33,72 @@ export const searchOffers = async (req: Request, res: Response) => {
   try {
     let q = req.query.q as string;
     // if (!q) {
-      // throw new Error("Query is required");
+    // throw new Error("Query is required");
     // }
     q = q.trim();
-    const promises = [
-      Coupon.find({
-        title: { $regex: q, $options: "i" },
-      }).limit(8).populate("brand"),
-      Brand.find({
-        name: { $regex: q, $options: "i" },
-      }).limit(5),
-    ];
+    const offers = await Coupon.aggregate([
+      {
+        $lookup: {
+          from: "brands",
+          localField: "brand",
+          foreignField: "_id",
+          as: "brand",
+        },
+      },
+      { $unwind: "$brand" },
+      {
+        $match: {
+          $or: [
+            { title: { $regex: q, $options: "i" } },
+            { "brand.name": { $regex: q, $options: "i" } },
+          ],
+        },
+      },
+      {
+        $limit: 8,
+      },
+    ]);
 
-    const [offers, brands] = await Promise.all(promises);
+    console.log(offers);
+
+    const brands = await Brand.aggregate([
+      {
+        $lookup: {
+          from: "coupons",
+          localField: "_id",
+          foreignField: "brand",
+          as: "coupons",
+        },
+      },
+      {
+        $addFields: {
+          couponCount: { $size: "$coupons" },
+        },
+      },
+      {
+        $project: {
+          coupons: 0,
+        },
+      },
+      { $limit: 5 },
+    ]);
+    // const promises = [
+    //   Coupon.find()
+    //     .populate("brand")
+    //     .find({
+    //       title: { $regex: q, $options: "i" },
+    //     })
+    //     .limit(8),
+    //   Brand.find({
+    //     name: { $regex: q, $options: "i" },
+    //   }).limit(5),
+    // ];
+    // const [offers, brands] = await Promise.all(promises);
+
     res.json({ offers, brands });
   } catch (error) {
+    console.log(error);
+
     res.status(400).json({ error });
   }
 };
