@@ -59,8 +59,6 @@ export const searchOffers = async (req: Request, res: Response) => {
       },
     ]);
 
-    console.log(offers);
-
     const brands = await Brand.aggregate([
       {
         $lookup: {
@@ -68,6 +66,11 @@ export const searchOffers = async (req: Request, res: Response) => {
           localField: "_id",
           foreignField: "brand",
           as: "coupons",
+        },
+      },
+      {
+        $match: {
+          name: { $regex: q, $options: "i" },
         },
       },
       {
