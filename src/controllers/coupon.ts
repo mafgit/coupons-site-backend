@@ -3,6 +3,7 @@ import Coupon from "../models/Coupon";
 import { ICoupon } from "../types/ICoupon";
 import { validateCoupon } from "../utils/validateEntity";
 import mongoose from "mongoose";
+import Brand from "../models/Brand";
 
 export const getCouponsForBrand = (req: Request, res: Response) => {
   Coupon.find({ brand: req.params.id })
@@ -26,6 +27,29 @@ export const getCouponById = (req: Request, res: Response) => {
     .catch((err) => {
       return res.status(400).json({ err });
     });
+};
+
+export const searchOffers = async (req: Request, res: Response) => {
+  try {
+    let q = req.query.q as string;
+    // if (!q) {
+      // throw new Error("Query is required");
+    // }
+    q = q.trim();
+    const promises = [
+      Coupon.find({
+        title: { $regex: q, $options: "i" },
+      }).limit(8).populate("brand"),
+      Brand.find({
+        name: { $regex: q, $options: "i" },
+      }).limit(5),
+    ];
+
+    const [offers, brands] = await Promise.all(promises);
+    res.json({ offers, brands });
+  } catch (error) {
+    res.status(400).json({ error });
+  }
 };
 
 export const getAllCoupons = async (
