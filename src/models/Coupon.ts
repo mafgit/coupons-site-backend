@@ -8,6 +8,7 @@ const couponSchema = new Schema({
   title: { type: String, required: true },
   code: { type: String, default: "" },
   verified: { type: Boolean, default: false },
+  view_count: { type: Number, default: 0 },
 });
 
 const Coupon = model("Coupon", couponSchema);

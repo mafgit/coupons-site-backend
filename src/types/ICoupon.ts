@@ -9,4 +9,5 @@ export interface ICoupon {
   terms_and_conditions: string;
   type: "code" | "deal";
   verified: boolean;
+  view_count: number;
 }

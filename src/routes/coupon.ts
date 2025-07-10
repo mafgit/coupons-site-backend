@@ -7,6 +7,7 @@ import {
   deleteCoupon,
   editCoupon,
   searchOffers,
+  viewCouponById,
 } from "../controllers/coupon";
 
 const router = Router();
@@ -18,5 +19,6 @@ router.delete("/delete/:id", deleteCoupon);
 router.get("/all", getAllCoupons);
 router.get("/for-brand/:id", getCouponsForBrand);
 router.get("/by-id/:id", getCouponById);
+router.post("/view-by-id/:id", viewCouponById);
 
 export default router;

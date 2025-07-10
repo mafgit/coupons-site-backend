@@ -7,6 +7,7 @@ const brandSchema = new Schema({
   website: { type: String, required: true },
   description: { type: String, required: true },
   slug: { type: String, required: true, unique: true, index: true },
+  view_count: { type: Number, default: 0 },
 });
 
 const Brand = model("Brand", brandSchema);

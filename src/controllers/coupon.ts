@@ -4,6 +4,7 @@ import { ICoupon } from "../types/ICoupon";
 import { validateCoupon } from "../utils/validateEntity";
 import mongoose from "mongoose";
 import Brand from "../models/Brand";
+import View from "../models/View";
 
 export const getCouponsForBrand = (req: Request, res: Response) => {
   Coupon.find({ brand: req.params.id })
@@ -16,17 +17,68 @@ export const getCouponsForBrand = (req: Request, res: Response) => {
     });
 };
 
-export const getCouponById = (req: Request, res: Response) => {
-  const { id } = req.params;
+export const viewCouponById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id))
+      throw new Error("Invalid ID passed");
 
-  Coupon.findById(id)
-    .populate("brand")
-    .then((coupon) => {
-      return res.json({ coupon });
-    })
-    .catch((err) => {
-      return res.status(400).json({ err });
-    });
+    const coupon = await Coupon.findById(
+      new mongoose.Types.ObjectId(id)
+    ).populate("brand");
+
+    if (coupon) {
+      try {
+        await View.create({
+          ip: req.ip,
+          couponId: id,
+        });
+
+        // await coupon.updateOne({
+        //   view_count: coupon.view_count + 1,
+        // });
+        // res.json({ coupon: { ...coupon, view_count: coupon.view_count + 1 } });
+        // return;
+        const updatedCoupon = await Coupon.findOneAndUpdate(
+          {
+            _id: coupon._id,
+          },
+          {
+            $inc: { view_count: 1 },
+          },
+          { new: true }
+        ).populate("brand");
+
+        res.json({ coupon: updatedCoupon });
+      } catch (err) {
+        console.log("Already viewed, not adding a view");
+      }
+    }
+
+    res.json({ coupon });
+  } catch (err) {
+    res.status(400).json({ err });
+  }
+};
+
+export const getCouponById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id))
+      throw new Error("Invalid ID passed");
+
+    const coupon = await Coupon.findById(
+      new mongoose.Types.ObjectId(id)
+    ).populate("brand");
+
+    if (!coupon) {
+      throw new Error("Coupon not found");
+    }
+
+    res.json({ coupon });
+  } catch (err) {
+    res.status(400).json({ err });
+  }
 };
 
 export const searchOffers = async (req: Request, res: Response) => {
@@ -121,10 +173,9 @@ export const getAllCoupons = async (
       query["title"] = { $regex: req.query.title, $options: "i" };
     if (req.query.code)
       query["code"] = { $regex: req.query.code, $options: "i" };
-    if (req.query.type)
-      query["type"] = req.query.type === "true" ? true : false;
+    if (req.query.type) query["type"] = req.query.type;
     if (req.query.verified) query["verified"] = { $eq: req.query.verified };
-    if (req.query.type)
+    if (req.query.code)
       query["code"] = { $regex: req.query.code, $options: "i" };
     if (req.query.price)
       query["price"] = { $eq: parseFloat(req.query.price as string) };
