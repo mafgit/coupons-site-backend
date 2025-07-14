@@ -179,17 +179,20 @@ export const getAllCoupons = async (
       query["code"] = { $regex: req.query.code, $options: "i" };
     if (req.query.price)
       query["price"] = { $eq: parseFloat(req.query.price as string) };
-    // if (req.query.category)
-    //   query["category"] = { $regex: req.query.category, $options: "i" };
+    if (
+      req.query.brand &&
+      mongoose.Types.ObjectId.isValid(req.query.brand as string)
+    )
+      query["brand"] = new mongoose.Types.ObjectId(req.query.brand as string);
 
     console.log(query);
 
     let coupons = await Coupon.find(query).populate("brand");
-    if (req.query.brand) {
-      coupons = coupons.filter(
-        (coupon) => (coupon.brand as any).name === (req.query.brand as string)
-      );
-    }
+    // if (req.query.brand) {
+    //   coupons = coupons.filter(
+    //     (coupon) => (coupon.brand as any).name === (req.query.brand as string)
+    //   );
+    // }
     res.json({ coupons });
   } catch (err) {
     res.status(400).json({ err, coupons: [] });
@@ -224,7 +227,7 @@ export const editCoupon = async (
     if (valid) {
       const coupon = await Coupon.updateOne(
         { _id: new mongoose.Types.ObjectId(id) },
-        req.body
+        { $set: req.body }
       );
       res.json({ coupon, success: true });
     } else {
@@ -246,5 +249,28 @@ export const deleteCoupon = async (
     res.json({ success: true });
   } catch (error) {
     res.status(400).json({ success: false, error });
+  }
+};
+
+
+export const reorderCoupon = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.body.draggedId))
+      throw new Error('Invalid Id');
+
+    await Coupon.updateOne(
+      { _id: new mongoose.Types.ObjectId(req.body.draggedId) },
+      {
+        $set: {
+          order: parseFloat(req.body.new_order as string),
+        },
+      }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err });
   }
 };

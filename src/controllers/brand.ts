@@ -21,15 +21,16 @@ export const getAllBrands = async (
       query["name"] = { $regex: req.query.name, $options: "i" };
     if (req.query.slug)
       query["slug"] = { $regex: req.query.slug, $options: "i" };
-    // if (req.query.category)
-    //   query["category"] = { $regex: req.query.category, $options: "i" };
-
-    let brands = await Brand.find(query).populate("category");
-    if (req.query.category) {
-      brands = brands.filter(
-        (brand) => (brand.category as any).name === req.query.category
+    if (
+      req.query.category &&
+      mongoose.Types.ObjectId.isValid(req.query.category as string)
+    ) {
+      query["category"] = new mongoose.Types.ObjectId(
+        req.query.category as string
       );
     }
+
+    let brands = await Brand.find(query).populate("category");
     res.json({ brands });
   } catch (err) {
     res.status(400).json({ err, brands: [] });
@@ -102,7 +103,7 @@ export const getBrandBySlug = async (
 
     if (brands.length === 0) throw new Error("Error");
     const brand = brands[0];
-    const rating = await Rating.findOne({brandId: brand._id, ip: req.ip})
+    const rating = await Rating.findOne({ brandId: brand._id, ip: req.ip });
     res.json({ brand, your_rating: rating?.number ?? 0 });
   } catch (err) {
     res.status(400).json({ err });
@@ -132,7 +133,11 @@ export const addBrand = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    await Brand.create(data);
+    const largest = await Brand.find({}).sort({ order: -1 }).limit(1);
+    let order = 100;
+    if (largest && largest.length > 0) order = largest[0].order + 100;
+
+    await Brand.create({ ...data, order });
     res.json({ success: true });
   } catch (error) {
     res.status(400).json({ success: false, error });
@@ -147,7 +152,7 @@ export const editBrand = async (req: Request, res: Response): Promise<void> => {
     if (valid) {
       const brand = await Brand.updateOne(
         { _id: new mongoose.Types.ObjectId(id) },
-        req.body
+        { $set: req.body }
       );
       res.json({ brand, success: true });
     } else {
@@ -176,7 +181,7 @@ export const rateBrand = async (req: Request, res: Response): Promise<void> => {
   try {
     const rating = parseInt(req.body.rating as string);
     const _id = req.params.id;
-    
+
     if (rating < 1 || rating > 5) throw new Error("Invalid rating");
     if (!mongoose.Types.ObjectId.isValid(_id)) throw new Error("Invalid Id");
 
@@ -193,6 +198,40 @@ export const rateBrand = async (req: Request, res: Response): Promise<void> => {
     res.json({ success: true });
   } catch (err) {
     console.log(err);
+    res.status(400).json({ success: false, error: err });
+  }
+};
+
+export const reorderBrand = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { new_orders }: { new_orders: { _id: string; order: number }[] } =
+      req.body;
+
+    console.log(req.body);
+
+    const ids = new_orders.map((i) => i._id);
+    const bulk = [];
+    for (let i = 0; i < ids.length; i++) {
+      bulk.push({
+        updateOne: {
+          filter: {
+            _id: new mongoose.Types.ObjectId(ids[i]),
+          },
+          update: {
+            $set: {
+              order: new_orders[i].order,
+            },
+          },
+        },
+      });
+    }
+
+    await Brand.bulkWrite(bulk);
+    res.json({ success: true });
+  } catch (err) {
     res.status(400).json({ success: false, error: err });
   }
 };

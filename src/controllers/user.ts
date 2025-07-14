@@ -20,8 +20,7 @@ export const getAllUsers = async (
       query["name"] = { $regex: req.query.name, $options: "i" };
     if (req.query.email)
       query["email"] = { $regex: req.query.email, $options: "i" };
-
-    console.log(query);
+    if (req.query.role) query["role"] = req.query.role;
 
     const users = await User.find(query);
     res.json({ users });
@@ -35,7 +34,7 @@ export const getUserById = (req: Request, res: Response): void => {
     User.findById(new mongoose.Types.ObjectId(req.params.id as string))
       .then((user) => {
         console.log(user);
-        
+
         res.json({ user });
       })
       .catch((err) => {
@@ -77,7 +76,7 @@ export const editUser = async (req: Request, res: Response): Promise<void> => {
     if (valid) {
       const user = await User.updateOne(
         { _id: new mongoose.Types.ObjectId(id) },
-        req.body
+        { $set: req.body }
       );
       res.json({ user, success: true });
     } else {
@@ -99,5 +98,27 @@ export const deleteUser = async (
     res.json({ success: true });
   } catch (error) {
     res.status(400).json({ success: false, error });
+  }
+};
+
+export const reorderUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.body.draggedId))
+      throw new Error("Invalid Id");
+
+    await User.updateOne(
+      { _id: new mongoose.Types.ObjectId(req.body.draggedId) },
+      {
+        $set: {
+          order: parseFloat(req.body.new_order as string),
+        },
+      }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err });
   }
 };

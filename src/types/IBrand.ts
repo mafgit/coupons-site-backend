@@ -13,4 +13,5 @@ export interface IBrand {
   view_count: number;
   rating?: number;
   rating_count?: number;
+  order: number;
 }

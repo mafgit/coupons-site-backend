@@ -67,7 +67,7 @@ export const editCategory = async (
     if (valid) {
       const category = await Category.updateOne(
         { _id: new mongoose.Types.ObjectId(id) },
-        req.body
+        { $set: req.body }
       );
       res.json({ category, success: true });
     } else {

@@ -65,8 +65,7 @@ interface AuthRequest extends Request {
 }
 
 export const me = async (req: AuthRequest, res: Response): Promise<void> => {
-  console.log("received me");
-
+  // console.log("received me");
   res.json({ userId: req.userId, role: req.role });
 };
 

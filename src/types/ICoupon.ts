@@ -10,4 +10,5 @@ export interface ICoupon {
   type: "code" | "deal";
   verified: boolean;
   view_count: number;
+  order: number;
 }

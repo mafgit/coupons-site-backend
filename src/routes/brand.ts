@@ -8,6 +8,8 @@ import {
   deleteBrand,
   getBrandById,
   rateBrand,
+  reorderBrand,
+  // reorderBrand
 } from "../controllers/brand";
 import { verifyLoggedIn } from "../middlewares/verifyLoggedIn";
 import { verifyAdmin } from "../middlewares/verifyAdmin";
@@ -15,6 +17,7 @@ import { verifyAdmin } from "../middlewares/verifyAdmin";
 const router = Router();
 
 router.post("/add", verifyLoggedIn, verifyAdmin, addBrand);
+router.post('/reorder', verifyLoggedIn, verifyAdmin, reorderBrand)
 router.put("/edit/:id", verifyLoggedIn, verifyAdmin, editBrand);
 router.delete("/delete/:id", verifyLoggedIn, verifyAdmin, deleteBrand);
 router.get("/all", getAllBrands);

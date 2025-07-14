@@ -5,4 +5,5 @@ export interface IUser {
   role: "admin" | "user";
   password: string;
   image: string;
+  order: number;
 }

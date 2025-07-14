@@ -13,7 +13,7 @@ export const verifyLoggedIn = (
   next: NextFunction
 ): void => {
   try {
-    console.log('going through verify logged in middleware ...');
+    // console.log('going through verify logged in middleware ...', req.body);
     
     const { token } = req.cookies;
     if (!token) {
