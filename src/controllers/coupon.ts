@@ -8,6 +8,7 @@ import View from "../models/View";
 
 export const getCouponsForBrand = (req: Request, res: Response) => {
   Coupon.find({ brand: req.params.id })
+    .sort({ order: 1 })
     .populate("brand")
     .then((coupons) => {
       return res.json({ coupons });
@@ -187,7 +188,9 @@ export const getAllCoupons = async (
 
     console.log(query);
 
-    let coupons = await Coupon.find(query).populate("brand");
+    let coupons = await Coupon.find(query)
+      .sort({ order: 1 })
+      .populate("brand");
     // if (req.query.brand) {
     //   coupons = coupons.filter(
     //     (coupon) => (coupon.brand as any).name === (req.query.brand as string)
@@ -252,25 +255,49 @@ export const deleteCoupon = async (
   }
 };
 
-
 export const reorderCoupon = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.body.draggedId))
-      throw new Error('Invalid Id');
-
-    await Coupon.updateOne(
-      { _id: new mongoose.Types.ObjectId(req.body.draggedId) },
-      {
-        $set: {
-          order: parseFloat(req.body.new_order as string),
+    const ids = JSON.parse(req.body.new_orders);
+    const bulk = ids.map((id: string, i: number) => {
+      if (!mongoose.Types.ObjectId.isValid(id)) throw new Error("Invalid Id");
+      return {
+        updateOne: {
+          filter: {
+            _id: new mongoose.Types.ObjectId(id),
+          },
+          update: {
+            $set: {
+              order: (i + 1) * 100,
+            },
+          },
         },
-      }
-    );
+      };
+    });
+
+    console.log(bulk);
+
+    await Coupon.bulkWrite(bulk);
     res.json({ success: true });
-  } catch (err) {
-    res.status(400).json({ success: false, error: err });
+  } catch (error) {
+    res.status(400).json({ success: false, error });
   }
+  // try {
+  //   if (!mongoose.Types.ObjectId.isValid(req.body.draggedId))
+  //     throw new Error("Invalid Id");
+
+  //   await Coupon.updateOne(
+  //     { _id: new mongoose.Types.ObjectId(req.body.draggedId) },
+  //     {
+  //       $set: {
+  //         order: parseFloat(req.body.new_order as string),
+  //       },
+  //     }
+  //   );
+  //   res.json({ success: true });
+  // } catch (err) {
+  //   res.status(400).json({ success: false, error: err });
+  // }
 };

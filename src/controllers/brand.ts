@@ -74,6 +74,16 @@ export const getBrandBySlug = async (
         },
       },
       {
+        $set: {
+          coupons: {
+            $sortArray: {
+              input: "$coupons",
+              sortBy: { order: 1 },
+            },
+          },
+        },
+      },
+      {
         $lookup: {
           from: "ratings",
           foreignField: "brandId",
@@ -198,40 +208,6 @@ export const rateBrand = async (req: Request, res: Response): Promise<void> => {
     res.json({ success: true });
   } catch (err) {
     console.log(err);
-    res.status(400).json({ success: false, error: err });
-  }
-};
-
-export const reorderBrand = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    const { new_orders }: { new_orders: { _id: string; order: number }[] } =
-      req.body;
-
-    console.log(req.body);
-
-    const ids = new_orders.map((i) => i._id);
-    const bulk = [];
-    for (let i = 0; i < ids.length; i++) {
-      bulk.push({
-        updateOne: {
-          filter: {
-            _id: new mongoose.Types.ObjectId(ids[i]),
-          },
-          update: {
-            $set: {
-              order: new_orders[i].order,
-            },
-          },
-        },
-      });
-    }
-
-    await Brand.bulkWrite(bulk);
-    res.json({ success: true });
-  } catch (err) {
     res.status(400).json({ success: false, error: err });
   }
 };

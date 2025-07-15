@@ -9,6 +9,8 @@ import { insertFakeData } from "./utils/insertFakeData";
 import Coupon from "./models/Coupon";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import swaggerUI from 'swagger-ui-express'
+import swaggerSpec from "./swagger";
 
 const app = express();
 app.use(
@@ -20,6 +22,7 @@ app.use(
 app.set("trust proxy", true);
 app.use(cookieParser());
 app.use(express.json());
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerSpec))
 app.use("/api/auth", authRouter);
 app.use("/api/brand", brandRouter);
 app.use("/api/user", userRouter);

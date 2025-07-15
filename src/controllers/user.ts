@@ -100,25 +100,3 @@ export const deleteUser = async (
     res.status(400).json({ success: false, error });
   }
 };
-
-export const reorderUser = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(req.body.draggedId))
-      throw new Error("Invalid Id");
-
-    await User.updateOne(
-      { _id: new mongoose.Types.ObjectId(req.body.draggedId) },
-      {
-        $set: {
-          order: parseFloat(req.body.new_order as string),
-        },
-      }
-    );
-    res.json({ success: true });
-  } catch (err) {
-    res.status(400).json({ success: false, error: err });
-  }
-};
